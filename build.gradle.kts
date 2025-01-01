@@ -16,13 +16,22 @@ java {
 dependencies {
     setOf(
         "org.springframework.boot:spring-boot-starter-web",
-        "com.google.guava:guava:33.4.0-jre"
+        "org.springframework.boot:spring-boot-starter-validation",
+        "org.springframework.boot:spring-boot-starter-jdbc",
+//        "org.springframework.boot:spring-boot-starter-data-jpa",
+        "org.springframework.boot:spring-boot-starter-data-jdbc",
+        "com.google.guava:guava:33.4.0-jre",
     ).forEach { implementation(it) }
 
+    runtimeOnly("com.h2database:h2")
     compileOnly("org.projectlombok:lombok:1.18.36")
     annotationProcessor("org.projectlombok:lombok:1.18.36")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    setOf(
+        "org.springframework.boot:spring-boot-starter-test",
+        "com.google.truth:truth:1.4.4"
+    ).forEach { testImplementation(it) };
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
