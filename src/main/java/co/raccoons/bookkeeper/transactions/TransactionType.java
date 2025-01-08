@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transaction;
+package co.raccoons.bookkeeper.transactions;
 
 enum TransactionType {
 

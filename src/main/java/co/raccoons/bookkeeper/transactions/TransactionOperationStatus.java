@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transaction;
+package co.raccoons.bookkeeper.transactions;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ResponseBody
 @Builder
 @Getter
-public final class TransactionOperationStatus {
+final class TransactionOperationStatus {
 
     @NotNull
     @Positive

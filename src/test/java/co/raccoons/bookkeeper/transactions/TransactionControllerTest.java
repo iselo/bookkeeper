@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transaction;
+package co.raccoons.bookkeeper.transactions;
 
 import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.DisplayName;

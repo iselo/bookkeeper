@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "2.7.18"
     id("io.spring.dependency-management") version "1.1.7"
+    checkstyle
 }
 
 group = "co.raccoons"
@@ -32,6 +33,10 @@ dependencies {
     ).forEach { testImplementation(it) };
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+checkstyle {
+    toolVersion = "10.12.4"
 }
 
 tasks.withType<Test> {

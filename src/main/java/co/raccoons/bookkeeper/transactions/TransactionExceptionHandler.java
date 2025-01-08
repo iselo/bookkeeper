@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transaction;
+package co.raccoons.bookkeeper.transactions;
 
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
 @Slf4j
-public class TransactionExceptionHandler {
+final class TransactionExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<TransactionOperationStatus> handle(TransactionNotFoundException e) {
