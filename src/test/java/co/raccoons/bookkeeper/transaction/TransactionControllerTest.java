@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,6 +47,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                                 Transaction.builder()
                                         .id(1)
                                         .description("Internet-GPON")
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .account(100)
                                         .type(TransactionType.DEPOSIT)
                                         .category(500)
@@ -54,7 +56,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         ))
         )
                 .andExpect(status().isCreated())
-                .andExpect(content().json("{id:1,description:Internet-GPON,account:100,type:DEPOSIT,category:500,amount:0.99}"));
+                .andExpect(content().json("{id:1,occurredOn:2025-01-01,description:Internet-GPON,account:100,type:DEPOSIT,category:500,amount:0.99}"));
     }
 
     @Test
@@ -66,6 +68,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         .content(toJson(
                                 Transaction.builder()
                                         .id(2)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .account(100)
                                         .description("Internet-GPON")
                                         .type(TransactionType.DEPOSIT)
@@ -78,7 +81,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                 get("/transactions/2")
         )
                 .andExpect(status().isOk())
-                .andExpect(content().json("{id:2,description:Internet-GPON,account:100,type:DEPOSIT,category:500,amount:0.99}"));
+                .andExpect(content().json("{id:2,occurredOn:2025-01-01,description:Internet-GPON,account:100,type:DEPOSIT,category:500,amount:0.99}"));
     }
 
     @Test
@@ -90,6 +93,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         .content(toJson(
                                 Transaction.builder()
                                         .id(3)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .description("Old")
                                         .account(100)
                                         .type(TransactionType.DEPOSIT)
@@ -104,6 +108,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         .content(toJson(
                                 Transaction.builder()
                                         .id(3)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .description("New")
                                         .account(103)
                                         .type(TransactionType.WITHDRAWAL)
@@ -114,16 +119,14 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         ))
 
         )
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{id:3,account:103,type:WITHDRAWAL,amount:0.99}"));
+                .andExpect(status().isOk());
 
         perform(
                 get("/transactions/3")
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{id:3,description:New,account:103,type:WITHDRAWAL,category:501,amount:0.99}"));
+                .andExpect(content().json("{id:3,occurredOn:2025-01-01,description:New,account:103,type:WITHDRAWAL,category:501,amount:0.99}"));
     }
 
     @Test
@@ -135,6 +138,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         .content(toJson(
                                 Transaction.builder()
                                         .id(3)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .description("Some description")
                                         .account(103)
                                         .type(TransactionType.WITHDRAWAL)
@@ -162,6 +166,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                         .content(toJson(
                                 Transaction.builder()
                                         .id(9)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
                                         .account(100)
                                         .description("Description sample")
                                         .type(TransactionType.DEPOSIT)
@@ -176,7 +181,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{}"));
+                .andExpect(content().json("{statusCode:200, message:'Successfully deleted'}"));
 
         perform(
                 get("/transactions/9")

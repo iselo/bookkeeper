@@ -1,5 +1,6 @@
 package co.raccoons.bookkeeper.transaction;
 
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,8 @@ public class TransactionExceptionHandler {
         return newResponseEntity(e, CONFLICT);
     }
 
-    private ResponseEntity<TransactionOperationStatus> newResponseEntity(RuntimeException e,
-                                                                         HttpStatus httpStatus) {
+    private ResponseEntity<@Valid TransactionOperationStatus> newResponseEntity(RuntimeException e,
+                                                                                HttpStatus httpStatus) {
         log.error(e.getMessage(), e);
         var transactionError = TransactionOperationStatus.builder()
                 .statusCode(httpStatus.value())

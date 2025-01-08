@@ -31,19 +31,22 @@ public class TransactionController {
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Valid
     public Transaction findById(@PathVariable Integer id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException("Transaction with id " +
                         id + " not found"));
     }
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @Valid
     public Transaction create(@Valid @RequestBody Transaction transaction) {
         return transactionRepository.save(transaction);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Valid
     public Transaction update(@Valid @RequestBody Transaction transaction, @PathVariable Integer id) {
         try {
             return transactionRepository.save(transaction);
@@ -53,15 +56,15 @@ public class TransactionController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<TransactionOperationStatus> delete(@PathVariable Integer id) {
+    public ResponseEntity<@Valid TransactionOperationStatus> delete(@PathVariable Integer id) {
         try {
             var transaction = findById(id);
             transactionRepository.delete(transaction);
             var status = TransactionOperationStatus.builder()
                     .statusCode(HttpStatus.OK.value())
-                    .message("Transaction with id " + id + " successfully deleted")
+                    .message("Successfully deleted")
                     .build();
             return ResponseEntity.ok(status);
         } catch (OptimisticLockingFailureException e) {

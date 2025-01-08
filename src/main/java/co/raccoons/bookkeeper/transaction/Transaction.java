@@ -5,44 +5,43 @@ import javax.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 
 @AllArgsConstructor
 @Getter
-@Setter
-@ToString
 @Builder
 final class Transaction {
 
     @Id
     @NotNull
-    private  Integer id;
-
-//    @NotNull
-//    private java.sql.Date date;
+    private final Integer id;
 
     @NotNull
-    private String description;
+    private Date occurredOn;
 
     @NotNull
-    private  Integer account;
+    private final String description;
 
     @NotNull
-    private  TransactionType type;
+    @Positive
+    private final Integer account;
+
+    @NotNull
+    private final TransactionType type;
 
     @Positive
-    private  BigDecimal amount;
+    private final BigDecimal amount;
 
     @NotNull
-    private  Integer category;
+    @Positive
+    private final Integer category;
 
-    private  String notes;
+    private final String notes;
 
     @Version
-    private Long version;
+    private final Long version;
 }
