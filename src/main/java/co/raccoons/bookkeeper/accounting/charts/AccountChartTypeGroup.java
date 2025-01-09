@@ -1,7 +1,7 @@
 package co.raccoons.bookkeeper.accounting.charts;
 
 
-enum AccountTypeGroup {
+enum AccountChartTypeGroup {
 
     ASSET,
     LIABILITY,

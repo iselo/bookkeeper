@@ -12,14 +12,14 @@ import org.springframework.data.annotation.Id;
 @Getter
 @ToString
 @Builder
-public class AccountType {
+public class AccountChartType {
 
     @Id
     @NotNull
     private final Integer id;
 
     @NotNull
-    private final AccountTypeGroup group;
+    private final AccountChartTypeGroup group;
 
     @NotNull
     @NotEmpty
