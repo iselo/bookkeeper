@@ -47,6 +47,9 @@ tasks {
     }
     jacocoTestReport {
         dependsOn(test)
+        reports {
+            xml.required.set(true)
+        }
     }
 
     // Excluded because SpringBoot application violates `HideUtilityClassConstructor` rule
