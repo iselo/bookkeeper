@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static java.lang.String.format;
+
 @RestController
 @RequestMapping(path = "/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TransactionController {
@@ -33,8 +35,8 @@ public class TransactionController {
     @Valid
     public Transaction findById(@PathVariable Integer id) {
         return transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException("Transaction with id " +
-                        id + " not found"));
+                .orElseThrow(() -> new TransactionNotFoundException(
+                        format("Transaction with id %s not found", id)));
     }
 
     @PostMapping
@@ -44,8 +46,7 @@ public class TransactionController {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
-            throw new TransactionOptimisticLockException("Transaction can't be " +
-                    "created due to optimistic lock");
+            throw new TransactionOptimisticLockException("Transaction can't be created");
         }
     }
 
@@ -55,8 +56,8 @@ public class TransactionController {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
-            throw new TransactionOptimisticLockException("Transaction with id " +
-                    id + " can't be updated due to optimistic lock");
+            var message = format("Transaction with id %s can't be updated", id);
+            throw new TransactionOptimisticLockException(message);
         }
     }
 
@@ -68,8 +69,8 @@ public class TransactionController {
             transactionRepository.delete(transaction);
             return new TransactionOperationStatus("Successfully deleted");
         } catch (OptimisticLockingFailureException e) {
-            throw new TransactionOptimisticLockException("Transaction with id " +
-                    id + " can't be deleted due to optimistic lock");
+            var message = format("Transaction with id %s can't be deleted", id);
+            throw new TransactionOptimisticLockException(message);
         }
     }
 }

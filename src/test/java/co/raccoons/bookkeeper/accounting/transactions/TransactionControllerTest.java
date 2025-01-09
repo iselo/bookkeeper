@@ -84,7 +84,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                                 .isInstanceOf(TransactionOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{message:\"Transaction can't be created due to optimistic lock\"}"));
+                .andExpect(content().json("{message:\"Transaction can't be created\"}"));
     }
 
     @Test
@@ -193,7 +193,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                                 .isInstanceOf(TransactionOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{message:\"Transaction with id 3 can't be updated due to optimistic lock\"}"));
+                .andExpect(content().json("{message:\"Transaction with id 3 can't be updated\"}"));
     }
 
     @Test
