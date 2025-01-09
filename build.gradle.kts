@@ -25,8 +25,8 @@ dependencies {
     ).forEach { implementation(it) }
 
     runtimeOnly("com.h2database:h2")
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
 
     setOf(
         "org.springframework.boot:spring-boot-starter-test",
