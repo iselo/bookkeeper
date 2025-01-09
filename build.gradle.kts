@@ -48,4 +48,9 @@ tasks {
     jacocoTestReport {
         dependsOn(test)
     }
+
+    // Excluded because SpringBoot application violates `HideUtilityClassConstructor` rule
+    checkstyleMain {
+        exclude("**/BookkeeperApp.java")
+    }
 }
