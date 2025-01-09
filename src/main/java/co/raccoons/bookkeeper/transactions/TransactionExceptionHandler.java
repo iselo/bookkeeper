@@ -27,10 +27,7 @@ final class TransactionExceptionHandler {
     private ResponseEntity<@Valid TransactionOperationStatus> newResponseEntity(RuntimeException e,
                                                                                 HttpStatus httpStatus) {
         log.error(e.getMessage(), e);
-        var transactionError = TransactionOperationStatus.builder()
-                .statusCode(httpStatus.value())
-                .message(e.getMessage())
-                .build();
+        var transactionError = new TransactionOperationStatus(e.getMessage());
         return new ResponseEntity<>(transactionError, httpStatus);
     }
 }

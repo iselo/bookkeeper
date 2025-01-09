@@ -1,4 +1,4 @@
-rootProject.name = "demo"
+rootProject.name = "bookkeeper"
 
 dependencyResolutionManagement {
     repositories {

@@ -1,19 +1,14 @@
 package co.raccoons.bookkeeper.transactions;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @ResponseBody
-@Builder
+@AllArgsConstructor
 @Getter
 final class TransactionOperationStatus {
-
-    @NotNull
-    @Positive
-    private Integer statusCode;
 
     @NotNull
     private String message;

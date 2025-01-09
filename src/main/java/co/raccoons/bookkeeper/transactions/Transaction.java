@@ -5,6 +5,7 @@ import javax.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 
@@ -13,6 +14,7 @@ import java.sql.Date;
 
 @AllArgsConstructor
 @Getter
+@ToString
 @Builder
 final class Transaction {
 

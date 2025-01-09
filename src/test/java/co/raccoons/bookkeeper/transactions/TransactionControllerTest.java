@@ -34,7 +34,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{statusCode:404,message:\"Transaction with id 0 not found\"}"));
+                .andExpect(content().json("{message:\"Transaction with id 0 not found\"}"));
     }
 
     @Test
@@ -154,7 +154,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                                 .isInstanceOf(TransactionOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{statusCode:409,message:\"Transaction with id 3 can't be updated due to optimistic lock\"}"));
+                .andExpect(content().json("{message:\"Transaction with id 3 can't be updated due to optimistic lock\"}"));
     }
 
     @Test
@@ -181,7 +181,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{statusCode:200, message:'Successfully deleted'}"));
+                .andExpect(content().json("{message:'Successfully deleted'}"));
 
         perform(
                 get("/transactions/9")

@@ -4,7 +4,6 @@ import javax.validation.Valid;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping(path = "/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TransactionController {
 
     private final TransactionRepository transactionRepository;
@@ -30,7 +29,7 @@ public class TransactionController {
         return transactionRepository.findAll();
     }
 
-    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/{id}")
     @Valid
     public Transaction findById(@PathVariable Integer id) {
         return transactionRepository.findById(id)
@@ -38,14 +37,19 @@ public class TransactionController {
                         id + " not found"));
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Valid
     public Transaction create(@Valid @RequestBody Transaction transaction) {
-        return transactionRepository.save(transaction);
+        try {
+            return transactionRepository.save(transaction);
+        } catch (OptimisticLockingFailureException e) {
+            throw new TransactionOptimisticLockException("Transaction " +
+                    transaction + " can't be created due to optimistic lock");
+        }
     }
 
-    @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping("/{id}")
     @Valid
     public Transaction update(@Valid @RequestBody Transaction transaction, @PathVariable Integer id) {
         try {
@@ -56,17 +60,13 @@ public class TransactionController {
         }
     }
 
-    @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<@Valid TransactionOperationStatus> delete(@PathVariable Integer id) {
+    @DeleteMapping("/{id}")
+    @Valid
+    public TransactionOperationStatus delete(@PathVariable Integer id) {
         try {
             var transaction = findById(id);
             transactionRepository.delete(transaction);
-            var status = TransactionOperationStatus.builder()
-                    .statusCode(HttpStatus.OK.value())
-                    .message("Successfully deleted")
-                    .build();
-            return ResponseEntity.ok(status);
+            return new TransactionOperationStatus("Successfully deleted");
         } catch (OptimisticLockingFailureException e) {
             throw new TransactionOptimisticLockException("Transaction with id " +
                     id + " can't be deleted due to optimistic lock");
