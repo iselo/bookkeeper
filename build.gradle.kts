@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "2.7.18"
     id("io.spring.dependency-management") version "1.1.7"
     checkstyle
+    jacoco
 }
 
 group = "co.raccoons"
@@ -39,6 +40,12 @@ checkstyle {
     toolVersion = "10.12.4"
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks {
+    test {
+        useJUnitPlatform()
+        finalizedBy(jacocoTestReport)
+    }
+    jacocoTestReport {
+        dependsOn(test)
+    }
 }
