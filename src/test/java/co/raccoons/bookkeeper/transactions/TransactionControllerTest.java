@@ -1,6 +1,10 @@
 package co.raccoons.bookkeeper.transactions;
 
 import co.raccoons.bookkeeper.MockMvcAwareTest;
+import co.raccoons.bookkeeper.accounting.transactions.Transaction;
+import co.raccoons.bookkeeper.accounting.transactions.TransactionNotFoundException;
+import co.raccoons.bookkeeper.accounting.transactions.TransactionOptimisticLockException;
+import co.raccoons.bookkeeper.accounting.transactions.TransactionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
