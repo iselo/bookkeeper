@@ -60,6 +60,34 @@ class TransactionControllerTest extends MockMvcAwareTest {
     }
 
     @Test
+    @DisplayName("creation throws exception")
+    void throwsOptimisticLockExceptionOnCreate() throws Exception {
+        perform(
+                post("/transactions")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(toJson(
+                                Transaction.builder()
+                                        .id(4)
+                                        .occurredOn(Date.valueOf("2025-01-01"))
+                                        .description("Some description")
+                                        .account(104)
+                                        .type(TransactionType.WITHDRAWAL)
+                                        .amount(BigDecimal.valueOf(0.99))
+                                        .category(500)
+                                        .version(0L)
+                                        .build()
+                        ))
+
+        )
+                .andExpect(result ->
+                        assertThat(result.getResolvedException())
+                                .isInstanceOf(TransactionOptimisticLockException.class))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json("{message:\"Transaction can't be created due to optimistic lock\"}"));
+    }
+
+    @Test
     @DisplayName("finds transaction by id")
     void findsByIdAndReturnsHttp200() throws Exception {
         perform(
@@ -82,6 +110,17 @@ class TransactionControllerTest extends MockMvcAwareTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(content().json("{id:2,occurredOn:2025-01-01,description:Internet-GPON,account:100,type:DEPOSIT,category:500,amount:0.99}"));
+    }
+
+    @Test
+    @DisplayName("finds all transactions")
+    void findsAllTransaction() throws Exception {
+        perform(
+                get("/transactions")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json("[{},{}]", false));
     }
 
     @Test
@@ -130,8 +169,8 @@ class TransactionControllerTest extends MockMvcAwareTest {
     }
 
     @Test
-    @DisplayName("handles optimistic lock error")
-    void throwsOptimisticLockExceptionAndReturnsHttp409() throws Exception {
+    @DisplayName("update throws exception")
+    void throwsOptimisticLockExceptionOnUpdate() throws Exception {
         perform(
                 put("/transactions/3")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)

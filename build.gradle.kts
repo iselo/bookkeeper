@@ -48,8 +48,7 @@ tasks {
     jacocoTestReport {
         dependsOn(test)
         reports {
-            xml.required.set(true) // Codecov
-            html.required.set(false)
+            xml.required.set(true) // Codecov dependency
         }
     }
 

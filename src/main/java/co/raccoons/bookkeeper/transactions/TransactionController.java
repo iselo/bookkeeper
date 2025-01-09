@@ -44,8 +44,8 @@ public class TransactionController {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
-            throw new TransactionOptimisticLockException("Transaction " +
-                    transaction + " can't be created due to optimistic lock");
+            throw new TransactionOptimisticLockException("Transaction can't be " +
+                    "created due to optimistic lock");
         }
     }
 
