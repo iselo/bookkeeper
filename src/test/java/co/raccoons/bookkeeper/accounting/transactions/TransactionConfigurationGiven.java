@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 @TestConfiguration
-public class TransactionConfigurationGiven {
+class TransactionConfigurationGiven {
 
     @Bean
     public Transaction newTransaction() {

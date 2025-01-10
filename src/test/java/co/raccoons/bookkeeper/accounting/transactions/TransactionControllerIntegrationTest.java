@@ -13,14 +13,6 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TransactionControllerIntegrationTest extends MockMvcAwareTest {
@@ -40,178 +32,189 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.size()", is(2));
-
-        perform(get("/transactions"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.size()", is(2)));
+                .jsonPath("$.size()").isEqualTo(2);
     }
 
     @Test
     @DisplayName("finds transaction by id")
     void findsByIdAndReturnsHttp200() throws Exception {
-        perform(get("/transactions/5"))
-                .andExpect(status().isOk())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.id", is(5)))
-                .andExpect(jsonPath("$.occurredOn", is("2025-01-01")))
-                .andExpect(jsonPath("$.description", is("Internet-LTE")))
-                .andExpect(jsonPath("$.account", is(100)))
-                .andExpect(jsonPath("$.type", is("DEPOSIT")))
-                .andExpect(jsonPath("$.category", is(500)))
-                .andExpect(jsonPath("$.amount", is(0.99)));
+        webTestClient.get()
+                .uri("/transactions/5")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(5)
+                .jsonPath("$.occurredOn").isEqualTo("2025-01-01")
+                .jsonPath("$.description").isEqualTo("Internet-LTE")
+                .jsonPath("$.account").isEqualTo(100)
+                .jsonPath("$.type").isEqualTo("DEPOSIT")
+                .jsonPath("$.category").isEqualTo(500)
+                .jsonPath("$.amount").isEqualTo(0.99);
     }
 
 
     @Test
     @DisplayName("findById throws transaction not found exception")
     void findByIdThrowsExceptionAndReturnsHttp404() throws Exception {
-        perform(get("/transactions/0"))
-                .andExpect(result ->
-                        assertThat(result.getResolvedException())
+        webTestClient.get()
+                .uri("/transactions/0")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result ->
+                        assertThat(getResolvedException(result))
                                 .isInstanceOf(TransactionNotFoundException.class)
                 )
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message", is("Transaction with id 0 not found")));
+                .jsonPath("$.message").isEqualTo("Transaction with id 0 not found");
     }
 
     @Test
     @DisplayName("creates transaction")
     void createsTransactionAndReturnsHttp201() throws Exception {
-        perform(post("/transactions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                        toJson(
-                                Transaction.builder()
-                                        .id(1)
-                                        .description("Internet-GPON")
-                                        .occurredOn(Date.valueOf("2025-01-01"))
-                                        .account(100)
-                                        .type(TransactionType.DEPOSIT)
-                                        .category(500)
-                                        .amount(BigDecimal.valueOf(0.99))
-                                        .build()
-                        )
-                ))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.occurredOn", is("2025-01-01")))
-                .andExpect(jsonPath("$.description", is("Internet-GPON")))
-                .andExpect(jsonPath("$.account", is(100)))
-                .andExpect(jsonPath("$.type", is("DEPOSIT")))
-                .andExpect(jsonPath("$.category", is(500)))
-                .andExpect(jsonPath("$.amount", is(0.99)));
+        var transaction = Transaction.builder()
+                .id(1)
+                .description("Internet-GPON")
+                .occurredOn(Date.valueOf("2025-01-01"))
+                .account(100)
+                .type(TransactionType.DEPOSIT)
+                .category(500)
+                .amount(BigDecimal.valueOf(0.99))
+                .build();
+        webTestClient.post()
+                .uri("/transactions")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(transaction)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.occurredOn").isEqualTo("2025-01-01")
+                .jsonPath("$.description").isEqualTo("Internet-GPON")
+                .jsonPath("$.account").isEqualTo(100)
+                .jsonPath("$.type").isEqualTo("DEPOSIT")
+                .jsonPath("$.category").isEqualTo(500)
+                .jsonPath("$.amount").isEqualTo(0.99);
     }
 
     @Test
     @DisplayName("creation throws exception")
     void throwsOptimisticLockExceptionOnCreate() throws Exception {
-        perform(post("/transactions")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(
-                        toJson(
-                                Transaction.builder()
-                                        .id(1)
-                                        .occurredOn(Date.valueOf("2025-01-01"))
-                                        .description("Some description")
-                                        .account(104)
-                                        .type(TransactionType.WITHDRAWAL)
-                                        .amount(BigDecimal.valueOf(0.99))
-                                        .category(500)
-                                        .version(10L)
-                                        .build()
-                        )
-                ))
-                .andExpect(result ->
-                        assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionOptimisticLockException.class))
-                .andExpect(status().isConflict())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message", is("Transaction can't be created")));
+        var transaction = Transaction.builder()
+                .id(1)
+                .occurredOn(Date.valueOf("2025-01-01"))
+                .description("Some description")
+                .account(104)
+                .type(TransactionType.WITHDRAWAL)
+                .amount(BigDecimal.valueOf(0.99))
+                .category(500)
+                .version(10L)
+                .build();
+        webTestClient.post()
+                .uri("/transactions")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(transaction)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result ->
+                        assertThat(getResolvedException(result))
+                                .isInstanceOf(TransactionOptimisticLockException.class)
+                )
+                .jsonPath("$.message").isEqualTo("Transaction can't be created");
     }
 
     @Test
     @DisplayName("updates transaction by id")
     void updatesTransactionAndReturnsHttp204() throws Exception {
-        perform(put("/transactions/1")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(
-                        toJson(
-                                Transaction.builder()
-                                        .id(1)
-                                        .occurredOn(Date.valueOf("2025-01-01"))
-                                        .description("New")
-                                        .account(105)
-                                        .type(TransactionType.WITHDRAWAL)
-                                        .amount(BigDecimal.valueOf(0.99))
-                                        .category(505)
-                                        .version(0L)
-                                        .build()
-                        )
-                ))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.occurredOn", is("2025-01-01")))
-                .andExpect(jsonPath("$.description", is("New")))
-                .andExpect(jsonPath("$.account", is(105)))
-                .andExpect(jsonPath("$.type", is("WITHDRAWAL")))
-                .andExpect(jsonPath("$.category", is(505)))
-                .andExpect(jsonPath("$.amount", is(0.99)));
+        Transaction transaction = Transaction.builder()
+                .id(1)
+                .occurredOn(Date.valueOf("2025-01-01"))
+                .description("New")
+                .account(101)
+                .type(TransactionType.WITHDRAWAL)
+                .amount(BigDecimal.valueOf(0.99))
+                .category(501)
+                .version(0L)
+                .build();
+        webTestClient.put()
+                .uri("/transactions/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(transaction)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.occurredOn").isEqualTo("2025-01-01")
+                .jsonPath("$.description").isEqualTo("New")
+                .jsonPath("$.account").isEqualTo(101)
+                .jsonPath("$.type").isEqualTo("WITHDRAWAL")
+                .jsonPath("$.category").isEqualTo(501)
+                .jsonPath("$.amount").isEqualTo(0.99);
     }
 
     @Test
     @DisplayName("update throws exception")
     void throwsOptimisticLockExceptionOnUpdate() throws Exception {
-        perform(put("/transactions/5")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(toJson(
-                                Transaction.builder()
-                                        .id(5)
-                                        .occurredOn(Date.valueOf("2025-01-01"))
-                                        .description("Some description")
-                                        .account(103)
-                                        .type(TransactionType.WITHDRAWAL)
-                                        .amount(BigDecimal.valueOf(0.99))
-                                        .category(500)
-                                        .version(0L)
-                                        .build()
-                        )
-                ))
-                .andExpect(result ->
-                        assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionOptimisticLockException.class))
-                .andExpect(status().isConflict())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message", is("Transaction with id 5 can't be updated")));
+        Transaction transaction = Transaction.builder()
+                .id(5)
+                .occurredOn(Date.valueOf("2025-01-01"))
+                .description("Some description")
+                .account(103)
+                .type(TransactionType.WITHDRAWAL)
+                .amount(BigDecimal.valueOf(0.99))
+                .category(500)
+                .version(0L)
+                .build();
+        webTestClient.put()
+                .uri("/transactions/5")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(transaction)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result ->
+                        assertThat(getResolvedException(result))
+                                .isInstanceOf(TransactionOptimisticLockException.class)
+                )
+                .jsonPath("$.message").isEqualTo("Transaction with id 5 can't be updated");
     }
-
 
     @Test
     @DisplayName("deletes transaction by id")
     void deletesTransactionAndReturnsHttp204() throws Exception {
-        perform(delete("/transactions/5"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(content().json("{message:'Successfully deleted'}"));
+        webTestClient.delete()
+                .uri("/transactions/5")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Successfully deleted");
 
-        perform(get("/transactions/5"))
-                .andExpect(status().isNotFound());
+        webTestClient.get()
+                .uri("/transactions/5")
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
     @DisplayName("delete throws transaction not found exception")
     void deleteThrowsExceptionAndReturnsHttp404() throws Exception {
-        perform(delete("/transactions/9"))
-                .andExpect(result ->
-                        assertThat(result.getResolvedException())
+        webTestClient.delete()
+                .uri("/transactions/9")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result ->
+                        assertThat(getResolvedException(result))
                                 .isInstanceOf(TransactionNotFoundException.class)
                 )
-                .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message", is("Transaction with id 9 not found")));
+                .jsonPath("$.message").isEqualTo("Transaction with id 9 not found");
     }
 }
