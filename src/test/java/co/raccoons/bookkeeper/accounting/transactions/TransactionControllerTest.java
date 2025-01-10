@@ -1,19 +1,19 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
 import co.raccoons.bookkeeper.MockMvcAwareTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -31,33 +31,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TransactionController.class)
+@Import(TransactionConfigurationGiven.class)
 class TransactionControllerTest extends MockMvcAwareTest {
 
     @MockBean
     private TransactionRepository repository;
 
-    private final List<Transaction> transactions = new ArrayList<>();
-
+    @Autowired
     private Transaction transaction;
-
-    @BeforeEach
-    void setUp() {
-        this.transaction =
-                Transaction.builder()
-                        .id(5)
-                        .description("Internet-LTE")
-                        .occurredOn(Date.valueOf("2025-01-01"))
-                        .account(100)
-                        .type(TransactionType.DEPOSIT)
-                        .category(500)
-                        .amount(BigDecimal.valueOf(0.99))
-                        .build();
-        transactions.add(transaction);
-    }
 
     @Test
     @DisplayName("finds all transactions")
     void findsAllTransaction() throws Exception {
+        var transactions = new ArrayList<>();
+        transactions.add(transaction);
         doReturn(transactions)
                 .when(repository)
                 .findAll();
@@ -103,19 +90,8 @@ class TransactionControllerTest extends MockMvcAwareTest {
     void createsTransactionAndReturnsHttp201() throws Exception {
         perform(post("/transactions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                        toJson(
-                                Transaction.builder()
-                                        .id(1)
-                                        .description("Internet-GPON")
-                                        .occurredOn(Date.valueOf("2025-01-01"))
-                                        .account(100)
-                                        .type(TransactionType.DEPOSIT)
-                                        .category(500)
-                                        .amount(BigDecimal.valueOf(0.99))
-                                        .build()
-                        )
-                ))
+                .content(toJson(transaction))
+        )
                 .andExpect(status().isCreated());
     }
 
@@ -140,7 +116,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
     @Test
     @DisplayName("updates transaction by id")
     void updatesTransactionAndReturnsHttp204() throws Exception {
-        var transaction = Transaction.builder()
+        var newTransaction = Transaction.builder()
                 .id(3)
                 .occurredOn(Date.valueOf("2025-01-01"))
                 .description("New")
@@ -149,12 +125,12 @@ class TransactionControllerTest extends MockMvcAwareTest {
                 .amount(BigDecimal.valueOf(0.99))
                 .category(503)
                 .build();
-        doReturn(transaction)
+        doReturn(newTransaction)
                 .when(repository)
                 .save(any());
         perform(put("/transactions/3")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(toJson(transaction))
+                .content(toJson(newTransaction))
         )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
