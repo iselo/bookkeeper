@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transactions;
+package co.raccoons.bookkeeper.accounting.transactions;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -23,7 +23,7 @@ final class Transaction {
     private final Integer id;
 
     @NotNull
-    private Date occurredOn;
+    private final Date occurredOn;
 
     @NotNull
     private final String description;

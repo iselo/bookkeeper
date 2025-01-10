@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transactions;
+package co.raccoons.bookkeeper.accounting.transactions;
 
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

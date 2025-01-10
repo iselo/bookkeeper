@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.transactions;
+package co.raccoons.bookkeeper.accounting.transactions;
 
 import org.springframework.data.repository.CrudRepository;
 
