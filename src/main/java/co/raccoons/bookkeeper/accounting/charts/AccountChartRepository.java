@@ -1,6 +1,6 @@
 package co.raccoons.bookkeeper.accounting.charts;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-interface AccountChartRepository extends CrudRepository<AccountChart, Integer> {
+interface AccountChartRepository extends MongoRepository<AccountChart, Integer> {
 }

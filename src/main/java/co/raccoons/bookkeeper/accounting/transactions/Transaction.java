@@ -8,14 +8,16 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
 @ToString
 @Builder
+@Document("Transaction")
 final class Transaction {
 
     @Id
@@ -23,7 +25,7 @@ final class Transaction {
     private final Integer id;
 
     @NotNull
-    private final Date occurredOn;
+    private final LocalDate occurredOn;
 
     @NotNull
     private final String description;

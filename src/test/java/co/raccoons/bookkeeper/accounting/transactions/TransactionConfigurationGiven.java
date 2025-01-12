@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @TestConfiguration
 class TransactionConfigurationGiven {
@@ -14,7 +14,7 @@ class TransactionConfigurationGiven {
         return Transaction.builder()
                 .id(5)
                 .description("Internet-LTE")
-                .occurredOn(Date.valueOf("2025-01-01"))
+                .occurredOn(LocalDate.parse("2025-01-01"))
                 .account(100)
                 .type(TransactionType.DEPOSIT)
                 .category(500)

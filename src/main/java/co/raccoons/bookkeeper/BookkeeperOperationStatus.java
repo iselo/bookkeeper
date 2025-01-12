@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper.accounting.transactions;
+package co.raccoons.bookkeeper;
 
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ResponseBody
 @AllArgsConstructor
 @Getter
-final class TransactionOperationStatus {
+public final class BookkeeperOperationStatus {
 
     @NotNull
     private String message;

@@ -1,5 +1,8 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
+import co.raccoons.bookkeeper.BookkeeperNotFoundException;
+import co.raccoons.bookkeeper.BookkeeperOperationStatus;
+import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import javax.validation.Valid;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -35,7 +38,7 @@ public class TransactionController {
     @Valid
     public Transaction findById(@PathVariable Integer id) {
         return transactionRepository.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException(
+                .orElseThrow(() -> new BookkeeperNotFoundException(
                         format("Transaction with id %s not found", id)));
     }
 
@@ -46,7 +49,7 @@ public class TransactionController {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
-            throw new TransactionOptimisticLockException("Transaction can't be created");
+            throw new BookkeeperOptimisticLockException("Transaction can't be created");
         }
     }
 
@@ -57,20 +60,20 @@ public class TransactionController {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
             var message = format("Transaction with id %s can't be updated", id);
-            throw new TransactionOptimisticLockException(message);
+            throw new BookkeeperOptimisticLockException(message);
         }
     }
 
     @DeleteMapping("/{id}")
     @Valid
-    public TransactionOperationStatus delete(@PathVariable Integer id) {
+    public BookkeeperOperationStatus delete(@PathVariable Integer id) {
         try {
             var transaction = findById(id);
             transactionRepository.delete(transaction);
-            return new TransactionOperationStatus("Successfully deleted");
+            return new BookkeeperOperationStatus("Successfully deleted");
         } catch (OptimisticLockingFailureException e) {
             var message = format("Transaction with id %s can't be deleted", id);
-            throw new TransactionOptimisticLockException(message);
+            throw new BookkeeperOptimisticLockException(message);
         }
     }
 }

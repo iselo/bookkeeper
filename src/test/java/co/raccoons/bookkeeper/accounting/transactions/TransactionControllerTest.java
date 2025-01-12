@@ -1,18 +1,20 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
+import co.raccoons.bookkeeper.BookkeeperNotFoundException;
+import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -30,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TransactionController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Import(TransactionConfigurationGiven.class)
 class TransactionControllerTest extends MockMvcAwareTest {
 
@@ -78,7 +80,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         perform(get("/transactions/0"))
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionNotFoundException.class)
+                                .isInstanceOf(BookkeeperNotFoundException.class)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -107,7 +109,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         )
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionOptimisticLockException.class))
+                                .isInstanceOf(BookkeeperOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.message", is("Transaction can't be created")));
@@ -118,7 +120,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
     void updatesTransactionAndReturnsHttp204() throws Exception {
         var newTransaction = Transaction.builder()
                 .id(3)
-                .occurredOn(Date.valueOf("2025-01-01"))
+                .occurredOn(LocalDate.parse("2025-01-01"))
                 .description("New")
                 .account(103)
                 .type(TransactionType.WITHDRAWAL)
@@ -155,7 +157,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         )
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionOptimisticLockException.class))
+                                .isInstanceOf(BookkeeperOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.message", is("Transaction with id 3 can't be updated")));
@@ -179,7 +181,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         perform(delete("/transactions/9"))
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionNotFoundException.class)
+                                .isInstanceOf(BookkeeperNotFoundException.class)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -195,7 +197,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         perform(delete("/transactions/9"))
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(TransactionOptimisticLockException.class)
+                                .isInstanceOf(BookkeeperOptimisticLockException.class)
                 )
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

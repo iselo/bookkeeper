@@ -7,11 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @AllArgsConstructor
 @Getter
 @ToString
 @Builder
+@Document
 public class AccountChartType {
 
     @Id
