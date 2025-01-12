@@ -4,10 +4,7 @@ on: [ push, pull_request ]
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,14 +25,8 @@ jobs:
           MONGODB_ATLAS_CLUSTER: ${{ secrets.MONGODB_ATLAS_CLUSTER }}
 
       - run: ./gradlew jacocoTestReport
-      - uses: actions/upload-artifact@v4
-        with:
-          name: jacocoTestReport_xml
-          path: build/reports/jacoco/test/jacocoTestReport.xml
 
-  upload-codecov:
-    needs: build
-    uses: ./.github/workflows/upload-codcov.yml
-    with:
-      report_name: jacocoTestReport_xml
-      report_path: build/reports/jacoco/test/jacocoTestReport.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
