@@ -1,0 +1,50 @@
+name: MongoDB Atlas Setup
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        required: true
+        type: string
+      cluster-name:
+        required: true
+        type: string
+      username:
+        required: true
+        type: string
+      password:
+        required: true
+        type: string
+    outputs:
+      project-id:
+        value: ${{ jobs.setup.outputs.project-id }}
+      connection-string:
+        value: ${{ jobs.setup.outputs.connection-string }}
+
+env:
+  MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
+  MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
+  MONGODB_ATLAS_ORG_ID: ${{ secrets.MONGODB_ATLAS_ORG_ID }}
+  MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      project-id: ${{ steps.create-project.outputs.create-project-id }}
+      connection-string: ${{ steps.setup.outputs.connection-string }}
+    steps:
+      - name: Setup AtlasCLI and create a project
+        id: create-project
+        uses: mongodb/atlas-github-action@v0.2.0
+        with:
+          create-project-name: ${{ inputs.project-name }}
+      - name: Run setup
+        id: setup
+        uses: mongodb/atlas-github-action@v0.2.0
+        with:
+          run-setup: true
+          project-id: ${{ steps.create-project.outputs.create-project-id }}
+          cluster-name: ${{ inputs.cluster-name }}
+          username: ${{ inputs.username }}
+          password: ${{ inputs.password }}
