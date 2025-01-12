@@ -1,13 +1,13 @@
 name: Build
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
   build:
 
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-20.04]
+        os: [ ubuntu-latest, ubuntu-20.04 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +22,11 @@ jobs:
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
       - run: ./gradlew build
+        env:
+          MONGODB_ATLAS_USER: ${{ secrets.MONGODB_ATLAS_USER }}
+          MONGODB_ATLAS_PASSWORD: ${{ secrets.MONGODB_ATLAS_PASSWORD }}
+          MONGODB_ATLAS_CLUSTER: ${{ secrets.MONGODB_ATLAS_CLUSTER }}
+
       - run: ./gradlew jacocoTestReport
 
       - name: Upload coverage to Codecov
