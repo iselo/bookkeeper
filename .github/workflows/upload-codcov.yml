@@ -14,7 +14,7 @@ jobs:
   upload-codecov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/upload-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.report_name }}
           path: ${{ inputs.report_path }}
@@ -22,3 +22,6 @@ jobs:
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          fail_ci_if_error: true
+          flags: '--nonZero'
