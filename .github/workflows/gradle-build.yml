@@ -1,20 +1,29 @@
-name: Build
+name: Build with Gradle
 
-on: [ push, pull_request ]
+on:
+  workflow_call:
+    inputs:
+      project-id:
+        required: true
+        type: string
+      connection-string:
+        required: true
+        type: string
+      username:
+        required: true
+        type: string
+      password:
+        required: true
+        type: string
+env:
+  MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
+  MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
+  MONGODB_ATLAS_ORG_ID: ${{ secrets.MONGODB_ATLAS_ORG_ID }}
+  MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+
 jobs:
-
-  mongodb-atlas-setup:
-    uses: ./.github/workflows/mongodb-atlas-setup.yml
-    with:
-      project-name: bookkeeper-test-${{github.run_number}}
-      cluster-name: bookkeeper-cluster
-      username: user
-      password: ac85Z15d2d481Qr7
-    secrets: inherit
-
   build:
     runs-on: ubuntu-latest
-    needs: mongodb-atlas-setup
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,26 +36,27 @@ jobs:
           distribution: temurin
 
       - name: Get the public IP of this runner
-        id: get_gh_runner_ip
+        id: gh-runner-ip
         shell: bash
-        run: echo "ip_address=$(curl https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
-      - name: Setup AtlasCLI
+        run: echo "ip-address=$(curl https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
+      - name: Install AtlasCLI
         uses: mongodb/atlas-github-action@v0.2.0
-      - name: Add runner IP to MongoDB access list
+      - name: Add GH runner IP to MongoDB access list
+        id: allow-runner-ip
         shell: bash
-        run: atlas accessLists create ${{ steps.get_gh_runner_ip.outputs.ip_address }} --type ipAddress --projectId ${{ needs.mongodb-atlas-setup.outputs.project-id }}
-        env:
-          MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
-          MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
-          MONGODB_ATLAS_ORG_ID: ${{ secrets.MONGODB_ATLAS_ORG_ID }}
-          MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+        run: atlas accessLists create ${{ steps.gh-runner-ip.outputs.ip-address }} --type ipAddress --projectId ${{ inputs.project-id }}
+
+      - name: Add user and password to the connection string
+        id: mongodb-atlas-uri
+        shell: bash
+        run: value=$(echo ${{ inputs.connection-string }} | sed "s~:\/\/~&${{ inputs.username }}:${{ inputs.password }}@~") && echo "value=$value" >> "$GITHUB_OUTPUT"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-      - run: ./gradlew buildK
+      - run: ./gradlew build
         env:
           SPRING_PROFILES_ACTIVE: test
-          MONGODB_ATLAS_CONNECTION_STRING: ${{ needs.mongodb-atlas-setup.outputs.connection-string }}
+          MONGODB_ATLAS_URI: ${{ steps.mongodb-atlas-uri.outputs.value }}
       - run: ./gradlew jacocoTestReport
 
       - name: Upload coverage to Codecov
@@ -54,13 +64,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  mongodb-atlas-teardown:
-    if: always()
-    needs:
-      - mongodb-atlas-setup
-      - build
-    uses: ./.github/workflows/mongodb-atlas-teardown.yml
-    with:
-      project-id: ${{ needs.mongodb-atlas-setup.outputs.project-id }}
-      cluster-name: bookkeeper-cluster
-    secrets: inherit
+      - name: Remove GH runner IP from MongDB access list
+        if: ${{ always() && steps.allow-runner-ip.conclusion == 'success' }}
+        shell: bash
+        run: atlas accessLists delete ${{ steps.gh-runner-ip.outputs.ip-address }} --projectId ${{ inputs.project-id }} --force

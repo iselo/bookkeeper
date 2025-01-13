@@ -34,7 +34,7 @@ jobs:
       project-id: ${{ steps.create-project.outputs.create-project-id }}
       connection-string: ${{ steps.setup.outputs.connection-string }}
     steps:
-      - name: Setup AtlasCLI and create a project
+      - name: Install AtlasCLI and create a project
         id: create-project
         uses: mongodb/atlas-github-action@v0.2.0
         with:
