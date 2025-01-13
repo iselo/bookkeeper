@@ -34,7 +34,7 @@ jobs:
         uses: mongodb/atlas-github-action@v0.2.0
       - name: Add runner IP to MongoDB access list
         shell: bash
-        run: atlas accessLists create ${{ steps.get_gh_runner_ip.outputs.ip_address }} --type ipAddress --projectId ${{ needs.mongodb-atlas-setup.output.project-id }}
+        run: atlas accessLists create ${{ steps.get_gh_runner_ip.outputs.ip_address }} --type ipAddress --projectId ${{ needs.mongodb-atlas-setup.outputs.project-id }}
         env:
           MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
           MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
