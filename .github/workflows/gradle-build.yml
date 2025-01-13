@@ -9,7 +9,7 @@ jobs:
       project-name: bookkeeper-test-${{github.run_number}}
       cluster-name: bookkeeper-cluster
       username: user
-      password: password
+      password: ac85Z15d2d481Qr7
     secrets: inherit
 
   build:
