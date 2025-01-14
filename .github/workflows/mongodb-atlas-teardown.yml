@@ -1,0 +1,27 @@
+name: MongoDB Atlas Teardown
+
+on:
+  workflow_call:
+    inputs:
+      project-id:
+        required: true
+        type: string
+      cluster-name:
+        required: true
+        type: string
+
+env:
+  MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
+  MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
+  MONGODB_ATLAS_ORG_ID: ${{ secrets.MONGODB_ATLAS_ORG_ID }}
+  MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+
+jobs:
+  teardown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Teardown
+        uses: mongodb/atlas-github-action@v0.2.0
+        with:
+          delete-project-id: ${{ inputs.project-id }}
+          delete-cluster-name: ${{ inputs.cluster-name }}

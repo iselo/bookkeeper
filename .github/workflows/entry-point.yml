@@ -1,0 +1,34 @@
+name: Entry Point
+
+on: [ push, pull_request ]
+jobs:
+
+  mongodb-atlas-setup:
+    secrets: inherit
+    uses: ./.github/workflows/mongodb-atlas-setup.yml
+    with:
+      project-name: bookkeeper-test-${{github.run_number}}
+      cluster-name: bookkeeper-cluster # this string literal is also used in mongodb-atlas-teardown
+      username: user # this string literal is also used in build
+      password: ac85Z15d2d481Qr7 # this string literal is also used in build
+
+  gradle-build:
+    needs: mongodb-atlas-setup
+    secrets: inherit
+    uses: ./.github/workflows/gradle-build.yml
+    with:
+      project-id: ${{ needs.mongodb-atlas-setup.outputs.project-id }}
+      connection-string: ${{ needs.mongodb-atlas-setup.outputs.connection-string }}
+      username: user # this string literal defined by mongodb-atlas-setup
+      password: ac85Z15d2d481Qr7 # this string literal defined by mongodb-atlas-setup
+
+  mongodb-atlas-teardown:
+    if: ${{ always() }}
+    secrets: inherit
+    needs:
+      - mongodb-atlas-setup
+      - gradle-build
+    uses: ./.github/workflows/mongodb-atlas-teardown.yml
+    with:
+      project-id: ${{ needs.mongodb-atlas-setup.outputs.project-id }}
+      cluster-name: bookkeeper-cluster # this string literal defined by mongodb-atlas-setup

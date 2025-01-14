@@ -19,13 +19,11 @@ dependencies {
     setOf(
         "org.springframework.boot:spring-boot-starter-web",
         "org.springframework.boot:spring-boot-starter-validation",
-        "org.springframework.boot:spring-boot-starter-jdbc",
-        "org.springframework.boot:spring-boot-starter-data-jdbc",
+        "org.springframework.boot:spring-boot-starter-data-mongodb",
         "org.springframework.boot:spring-boot-starter-webflux",
         "com.google.guava:guava:33.4.0-jre",
     ).forEach { implementation(it) }
 
-    runtimeOnly("com.h2database:h2")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 

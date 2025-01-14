@@ -1,6 +1,6 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-interface TransactionRepository extends CrudRepository<Transaction, Integer> {
+interface TransactionRepository extends MongoRepository<Transaction, Integer> {
 }

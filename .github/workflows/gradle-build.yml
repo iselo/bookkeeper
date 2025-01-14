@@ -1,13 +1,29 @@
-name: Build
+name: Build with Gradle
 
-on: [push, pull_request]
+on:
+  workflow_call:
+    inputs:
+      project-id:
+        required: true
+        type: string
+      connection-string:
+        required: true
+        type: string
+      username:
+        required: true
+        type: string
+      password:
+        required: true
+        type: string
+env:
+  MONGODB_ATLAS_PUBLIC_API_KEY: ${{ secrets.MONGODB_ATLAS_PUBLIC_API_KEY }}
+  MONGODB_ATLAS_PRIVATE_API_KEY: ${{ secrets.MONGODB_ATLAS_PRIVATE_API_KEY }}
+  MONGODB_ATLAS_ORG_ID: ${{ secrets.MONGODB_ATLAS_ORG_ID }}
+  MONGODB_ATLAS_PROJECT_ID: ${{ secrets.MONGODB_ATLAS_PROJECT_ID }}
+
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, ubuntu-20.04]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,13 +34,37 @@ jobs:
         with:
           java-version: 11
           distribution: temurin
+
+      - name: Get the public IP of this runner
+        id: gh-runner-ip
+        shell: bash
+        run: echo "ip-address=$(curl https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
+      - name: Install AtlasCLI
+        uses: mongodb/atlas-github-action@v0.2.0
+      - name: Add GH runner IP to MongoDB access list
+        id: allow-runner-ip
+        shell: bash
+        run: atlas accessLists create ${{ steps.gh-runner-ip.outputs.ip-address }} --type ipAddress --projectId ${{ inputs.project-id }}
+
+      - name: Add user and password to the connection string
+        id: mongodb-atlas-uri
+        shell: bash
+        run: value=$(echo ${{ inputs.connection-string }} | sed "s~:\/\/~&${{ inputs.username }}:${{ inputs.password }}@~") && echo "value=$value" >> "$GITHUB_OUTPUT"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-
       - run: ./gradlew build
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          MONGODB_ATLAS_URI: ${{ steps.mongodb-atlas-uri.outputs.value }}
       - run: ./gradlew jacocoTestReport
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Remove GH runner IP from MongDB access list
+        if: ${{ always() && steps.allow-runner-ip.conclusion == 'success' }}
+        shell: bash
+        run: atlas accessLists delete ${{ steps.gh-runner-ip.outputs.ip-address }} --projectId ${{ inputs.project-id }} --force
