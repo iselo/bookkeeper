@@ -21,8 +21,8 @@ final class AccountChart {
     @NotNull
     private final Integer id;
 
-//    @NotNull
-//    private final AccountChartType type;
+    @NotNull
+    private final AccountChartType type;
 
     @NotNull
     @NotEmpty

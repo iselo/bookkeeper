@@ -44,7 +44,7 @@ class AccountChartControllerTest extends MockMvcAwareTest {
                 .id(1)
                 .name("Debit card")
                 .description("descr")
-//                .type(AccountChartType.builder().build())
+                .type(AccountChartType.builder().build())
                 .build();
 
         perform(post("/charts")

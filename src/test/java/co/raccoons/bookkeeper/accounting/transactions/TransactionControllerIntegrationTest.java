@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient(timeout = "PT15S")
 class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @LocalServerPort
@@ -65,7 +67,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("finds transaction by id")
-    void findsByIdAndReturnsHttp200() throws Exception {
+    void findsByIdAndReturnsHttp200() {
         webTestClient.get()
                 .uri("/transactions/1")
                 .exchange()
@@ -84,7 +86,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("findById throws transaction not found exception")
-    void findByIdThrowsExceptionAndReturnsHttp404() throws Exception {
+    void findByIdThrowsExceptionAndReturnsHttp404() {
         webTestClient.get()
                 .uri("/transactions/0")
                 .exchange()
@@ -100,7 +102,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("creates transaction")
-    void createsTransactionAndReturnsHttp201() throws Exception {
+    void createsTransactionAndReturnsHttp201() {
         var transaction = Transaction.builder()
                 .id(2)
                 .description("Internet-GPON")
@@ -129,7 +131,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("creation throws exception")
-    void throwsOptimisticLockExceptionOnCreate() throws Exception {
+    void throwsOptimisticLockExceptionOnCreate() {
         var transaction = Transaction.builder()
                 .id(1)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -157,7 +159,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("updates transaction by id")
-    void updatesTransactionAndReturnsHttp204() throws Exception {
+    void updatesTransactionAndReturnsHttp204() {
         Transaction transaction = Transaction.builder()
                 .id(1)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -187,7 +189,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("update throws exception")
-    void throwsOptimisticLockExceptionOnUpdate() throws Exception {
+    void throwsOptimisticLockExceptionOnUpdate() {
         Transaction transaction = Transaction.builder()
                 .id(5)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -215,7 +217,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("deletes transaction by id")
-    void deletesTransactionAndReturnsHttp204() throws Exception {
+    void deletesTransactionAndReturnsHttp204() {
         webTestClient.delete()
                 .uri("/transactions/1")
                 .exchange()
@@ -232,7 +234,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("delete throws transaction not found exception")
-    void deleteThrowsExceptionAndReturnsHttp404() throws Exception {
+    void deleteThrowsExceptionAndReturnsHttp404() {
         webTestClient.delete()
                 .uri("/transactions/9")
                 .exchange()

@@ -3,13 +3,13 @@ package co.raccoons.bookkeeper.accounting.transactions;
 import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import co.raccoons.bookkeeper.MockMvcAwareTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 
@@ -33,14 +33,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Import(TransactionConfigurationGiven.class)
 class TransactionControllerTest extends MockMvcAwareTest {
 
     @MockBean
     private TransactionRepository repository;
 
-    @Autowired
     private Transaction transaction;
+
+    @BeforeEach
+    void setUp(){
+        var context = new AnnotationConfigApplicationContext(TransactionConfigurationGiven.class);
+        transaction = context.getBean("newTransaction", Transaction.class);
+    }
 
     @Test
     @DisplayName("finds all transactions")
