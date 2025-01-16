@@ -22,6 +22,7 @@ dependencies {
         "org.springframework.boot:spring-boot-starter-data-mongodb",
         "org.springframework.boot:spring-boot-starter-webflux",
         "org.springframework:spring-aspects",
+        "com.papertrailapp:logback-syslog4j:1.0.0",
         "com.google.guava:guava:33.4.0-jre",
     ).forEach { implementation(it) }
 
