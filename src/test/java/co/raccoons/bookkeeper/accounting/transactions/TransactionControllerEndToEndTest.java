@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient(timeout = "PT15S")
-class TransactionControllerIntegrationTest extends MockMvcAwareTest {
+class TransactionControllerEndToEndTest extends MockMvcAwareTest {
 
     @LocalServerPort
     private Integer randomPort;

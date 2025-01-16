@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,13 +52,17 @@ class TransactionControllerTest extends MockMvcAwareTest {
     void findsAllTransaction() throws Exception {
         var transactions = new ArrayList<>();
         transactions.add(transaction);
+
         doReturn(transactions)
                 .when(repository)
                 .findAll();
+
         perform(get("/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.size()", is(transactions.size())));
+
+        verify(repository).findAll();
     }
 
     @Test
@@ -66,6 +71,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         doReturn(Optional.of(transaction))
                 .when(repository)
                 .findById(ArgumentMatchers.anyInt());
+
         perform(get("/transactions/5"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -76,6 +82,8 @@ class TransactionControllerTest extends MockMvcAwareTest {
                 .andExpect(jsonPath("$.type", is("DEPOSIT")))
                 .andExpect(jsonPath("$.category", is(500)))
                 .andExpect(jsonPath("$.amount", is(0.99)));
+
+        verify(repository).findById(5);
     }
 
     @Test
@@ -89,6 +97,8 @@ class TransactionControllerTest extends MockMvcAwareTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.message", is("Transaction with id 0 not found")));
+
+        verify(repository).findById(0);
     }
 
     @Test
@@ -155,7 +165,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
         doThrow(new OptimisticLockingFailureException("Updated error"))
                 .when(repository)
                 .save(any());
-        perform(put("/transactions/3")
+        perform(put("/transactions")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(toJson(transaction))
         )
@@ -164,7 +174,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
                                 .isInstanceOf(BookkeeperOptimisticLockException.class))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.message", is("Transaction with id 3 can't be updated")));
+                .andExpect(jsonPath("$.message", is("Transaction with id 5 can't be updated")));
     }
 
     @Test

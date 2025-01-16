@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class BookkeeperControllerLogger {
 
-    @Pointcut("within(co.raccoons.bookkeeper..*Controller)")
+    @Pointcut("@within(org.springframework.web.bind.annotation.RequestMapping)")
     private void anyEndpoint() {
     }
 
