@@ -5,11 +5,12 @@ import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.lang.String.format;
 
 @Service
-final class TransactionService {
+class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
@@ -21,13 +22,14 @@ final class TransactionService {
         return transactionRepository.findAll();
     }
 
-    public Transaction findById(Integer id) {
+    public Transaction findById(Integer id) throws BookkeeperNotFoundException {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new BookkeeperNotFoundException(
                         format("Transaction with id %s not found", id)));
     }
 
-    public Transaction create(Transaction transaction) {
+    @Transactional
+    public Transaction create(Transaction transaction) throws BookkeeperOptimisticLockException {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
@@ -35,7 +37,8 @@ final class TransactionService {
         }
     }
 
-    public Transaction update(Transaction transaction) {
+    @Transactional
+    public Transaction update(Transaction transaction) throws BookkeeperOptimisticLockException {
         try {
             return transactionRepository.save(transaction);
         } catch (OptimisticLockingFailureException e) {
@@ -44,7 +47,8 @@ final class TransactionService {
         }
     }
 
-    public BookkeeperOperationStatus delete(Integer id) {
+    @Transactional
+    public BookkeeperOperationStatus delete(Integer id) throws BookkeeperOptimisticLockException {
         try {
             var transaction = findById(id);
             transactionRepository.delete(transaction);

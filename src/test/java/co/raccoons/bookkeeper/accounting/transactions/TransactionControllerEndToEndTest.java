@@ -2,7 +2,6 @@ package co.raccoons.bookkeeper.accounting.transactions;
 
 import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
-import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +11,9 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient(timeout = "PT15S")
-class TransactionControllerEndToEndTest extends MockMvcAwareTest {
+class TransactionControllerEndToEndTest {
 
     @LocalServerPort
     private Integer randomPort;
@@ -30,7 +31,7 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
     private WebTestClient webTestClient;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         var transaction = Transaction.builder()
                 .id(1)
                 .description("Internet-GPON")
@@ -48,7 +49,7 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         webTestClient.delete().uri("/transactions/1").exchange();
         webTestClient.delete().uri("/transactions/2").exchange();
     }
@@ -158,7 +159,7 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
     }
 
     @Test
-    @DisplayName("updates transaction by id")
+    @DisplayName("updates transaction")
     void updatesTransactionAndReturnsHttp204() {
         Transaction transaction = Transaction.builder()
                 .id(1)
@@ -171,7 +172,7 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
                 .version(0L)
                 .build();
         webTestClient.put()
-                .uri("/transactions/1")
+                .uri("/transactions")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(transaction)
                 .exchange()
@@ -201,7 +202,7 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
                 .version(0L)
                 .build();
         webTestClient.put()
-                .uri("/transactions/5")
+                .uri("/transactions")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(transaction)
                 .exchange()
@@ -246,5 +247,9 @@ class TransactionControllerEndToEndTest extends MockMvcAwareTest {
                                 .isInstanceOf(BookkeeperNotFoundException.class)
                 )
                 .jsonPath("$.message").isEqualTo("Transaction with id 9 not found");
+    }
+
+    private Exception getResolvedException(EntityExchangeResult<byte[]> entityExchangeResult) {
+        return ((MvcResult) entityExchangeResult.getMockServerResult()).getResolvedException();
     }
 }

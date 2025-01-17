@@ -18,7 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient(timeout = "PT15S")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AccountChartControllerIntegrationTest {
+class AccountChartControllerEndToEndTest {
 
     @LocalServerPort
     private Integer randomPort;
