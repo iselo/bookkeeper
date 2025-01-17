@@ -29,11 +29,8 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    setOf(
-        "org.springframework.boot:spring-boot-starter-test",
-        "com.google.truth:truth:1.4.4"
-    ).forEach { testImplementation(it) };
 
+    testImplementation("org.springframework.boot:spring-boot-starter-test");
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

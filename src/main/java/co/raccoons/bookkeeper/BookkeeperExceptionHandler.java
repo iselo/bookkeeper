@@ -1,5 +1,6 @@
 package co.raccoons.bookkeeper;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,19 +15,22 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @Slf4j
 public final class BookkeeperExceptionHandler {
 
-    @ExceptionHandler
-    public ResponseEntity<BookkeeperOperationStatus> handle(BookkeeperNotFoundException e) {
-        return newResponseEntity(e, NOT_FOUND);
+    @ExceptionHandler(BookkeeperNotFoundException.class)
+    public ResponseEntity<BookkeeperOperationStatus> handle(HttpServletRequest request,
+                                                            BookkeeperNotFoundException e) {
+        return newResponseEntity(request, e, NOT_FOUND);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<BookkeeperOperationStatus> handle(BookkeeperOptimisticLockException e) {
-        return newResponseEntity(e, CONFLICT);
+    @ExceptionHandler(BookkeeperOptimisticLockException.class)
+    public ResponseEntity<BookkeeperOperationStatus> handle(HttpServletRequest request,
+                                                            BookkeeperOptimisticLockException e) {
+        return newResponseEntity(request, e, CONFLICT);
     }
 
-    private ResponseEntity<@Valid BookkeeperOperationStatus> newResponseEntity(RuntimeException e,
+    private ResponseEntity<@Valid BookkeeperOperationStatus> newResponseEntity(HttpServletRequest request,
+                                                                               RuntimeException e,
                                                                                HttpStatus httpStatus) {
-        log.error(e.getMessage(), e);
+        log.error(request.getRequestURL().toString() + "|" + e.getMessage() + "|" + httpStatus.toString());
         var transactionError = new BookkeeperOperationStatus(e.getMessage());
         return new ResponseEntity<>(transactionError, httpStatus);
     }

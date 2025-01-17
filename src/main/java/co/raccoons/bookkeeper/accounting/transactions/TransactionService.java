@@ -22,6 +22,7 @@ class TransactionService {
         return transactionRepository.findAll();
     }
 
+    @Transactional
     public Transaction findById(Integer id) throws BookkeeperNotFoundException {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new BookkeeperNotFoundException(
@@ -47,7 +48,6 @@ class TransactionService {
         }
     }
 
-    @Transactional
     public BookkeeperOperationStatus delete(Integer id) throws BookkeeperOptimisticLockException {
         try {
             var transaction = findById(id);

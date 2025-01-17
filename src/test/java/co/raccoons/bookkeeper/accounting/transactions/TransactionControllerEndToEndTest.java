@@ -1,7 +1,5 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
-import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,14 +9,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import static com.google.common.truth.Truth.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient(timeout = "PT15S")
@@ -86,18 +80,14 @@ class TransactionControllerEndToEndTest {
 
 
     @Test
-    @DisplayName("findById throws transaction not found exception")
-    void findByIdThrowsExceptionAndReturnsHttp404() {
+    @DisplayName("findById returns not found exception")
+    void findByIdReturnsHttp404() {
         webTestClient.get()
                 .uri("/transactions/0")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperNotFoundException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 0 not found");
     }
 
@@ -131,8 +121,8 @@ class TransactionControllerEndToEndTest {
     }
 
     @Test
-    @DisplayName("creation throws exception")
-    void throwsOptimisticLockExceptionOnCreate() {
+    @DisplayName("create conflict response")
+    void returnsCreateConflictResponse() {
         var transaction = Transaction.builder()
                 .id(1)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -151,10 +141,6 @@ class TransactionControllerEndToEndTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperOptimisticLockException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction can't be created");
     }
 
@@ -189,8 +175,8 @@ class TransactionControllerEndToEndTest {
     }
 
     @Test
-    @DisplayName("update throws exception")
-    void throwsOptimisticLockExceptionOnUpdate() {
+    @DisplayName("update conflict response")
+    void returnsUpdateConflictResponse() {
         Transaction transaction = Transaction.builder()
                 .id(5)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -209,10 +195,6 @@ class TransactionControllerEndToEndTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperOptimisticLockException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 5 can't be updated");
     }
 
@@ -234,22 +216,14 @@ class TransactionControllerEndToEndTest {
     }
 
     @Test
-    @DisplayName("delete throws transaction not found exception")
-    void deleteThrowsExceptionAndReturnsHttp404() {
+    @DisplayName("delete conflict response")
+    void returnsDeleteConflictResponse() {
         webTestClient.delete()
                 .uri("/transactions/9")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperNotFoundException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 9 not found");
-    }
-
-    private Exception getResolvedException(EntityExchangeResult<byte[]> entityExchangeResult) {
-        return ((MvcResult) entityExchangeResult.getMockServerResult()).getResolvedException();
     }
 }

@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -77,7 +77,7 @@ class TransactionControllerTest extends MockMvcAwareTest {
     @DisplayName("findById throws transaction not found exception")
     void findByIdThrowsExceptionAndReturnsHttp404() throws Exception {
         when(transactionService.findById(0))
-                .thenThrow(BookkeeperNotFoundException.class);
+                .thenThrow(new BookkeeperNotFoundException("Transaction with id 0 not found"));
 
         perform(get("/transactions/0"))
                 .andExpect(result ->
