@@ -38,7 +38,7 @@ jobs:
       - name: Get the public IP of this runner
         id: gh-runner-ip
         shell: bash
-        run: echo "ip-address=$(curl https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
+        run: echo "ip-address=$(curl -sS https://checkip.amazonaws.com)" >> "$GITHUB_OUTPUT"
       - name: Install AtlasCLI
         uses: mongodb/atlas-github-action@v0.2.0
       - name: Add GH runner IP to MongoDB access list
