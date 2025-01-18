@@ -1,4 +1,4 @@
-package co.raccoons.bookkeeper;
+package co.raccoons.bookkeeper.accounting.transactions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * the repository.
  */
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public final class BookkeeperNotFoundException extends RuntimeException {
+public final class TransactionNotFoundException extends RuntimeException {
 
-    public BookkeeperNotFoundException(String message) {
+    public TransactionNotFoundException(String message) {
         super(message);
     }
 }

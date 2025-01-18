@@ -41,7 +41,6 @@ public class TransactionController {
      * Handles HTTP GET request to the '/transactions/{id}' endpoint.
      */
     @GetMapping("/{id}")
-    @Valid
     public Transaction findById(@PathVariable Integer id) {
         return transactionService.findById(id);
     }
@@ -60,7 +59,6 @@ public class TransactionController {
      * Handles HTTP PUT request to the '/transactions' endpoint.
      */
     @PutMapping
-    @Valid
     public Transaction update(@Valid @RequestBody Transaction transaction) {
         return transactionService.update(transaction);
     }
@@ -69,7 +67,6 @@ public class TransactionController {
      * Handles HTTP DELETE request to the '/transactions/{id}' endpoint.
      */
     @DeleteMapping("/{id}")
-    @Valid
     public BookkeeperOperationStatus delete(@PathVariable Integer id) {
         return transactionService.delete(id);
     }

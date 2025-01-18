@@ -1,6 +1,5 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +35,12 @@ class TransactionService {
      *
      * @param id the id of the transaction to look up in the repository
      * @return an instance of the {@code Transaction}
-     * @throws BookkeeperNotFoundException if transaction not found
+     * @throws TransactionNotFoundException if transaction not found
      */
     @Transactional
-    public Transaction findById(Integer id) throws BookkeeperNotFoundException {
+    public Transaction findById(Integer id) throws TransactionNotFoundException {
         return transactionRepository.findById(id)
-                .orElseThrow(() -> new BookkeeperNotFoundException(
+                .orElseThrow(() -> new TransactionNotFoundException(
                         format("Transaction with id %s not found", id)));
     }
 
