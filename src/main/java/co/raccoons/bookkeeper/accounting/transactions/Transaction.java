@@ -4,20 +4,30 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * The class represents Bookkeeper application financial transaction.
+ * <p>
+ * This class is bounded to the web request, response body and used as domain
+ * object to be persisted in the MongoDB.
+ */
+@ResponseBody
+@Document("Transaction")
 @AllArgsConstructor
 @Getter
 @ToString
+@EqualsAndHashCode
 @Builder
-@Document("Transaction")
 final class Transaction {
 
     @Id

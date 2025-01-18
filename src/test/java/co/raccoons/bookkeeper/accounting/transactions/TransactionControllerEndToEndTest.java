@@ -1,13 +1,11 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
-import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
-import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
@@ -16,10 +14,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static com.google.common.truth.Truth.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TransactionControllerIntegrationTest extends MockMvcAwareTest {
+@AutoConfigureWebTestClient(timeout = "PT15S")
+class TransactionControllerEndToEndTest {
 
     @LocalServerPort
     private Integer randomPort;
@@ -28,7 +25,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
     private WebTestClient webTestClient;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         var transaction = Transaction.builder()
                 .id(1)
                 .description("Internet-GPON")
@@ -46,7 +43,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         webTestClient.delete().uri("/transactions/1").exchange();
         webTestClient.delete().uri("/transactions/2").exchange();
     }
@@ -65,7 +62,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
     @Test
     @DisplayName("finds transaction by id")
-    void findsByIdAndReturnsHttp200() throws Exception {
+    void findsByIdAndReturnsHttp200() {
         webTestClient.get()
                 .uri("/transactions/1")
                 .exchange()
@@ -83,24 +80,20 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
 
 
     @Test
-    @DisplayName("findById throws transaction not found exception")
-    void findByIdThrowsExceptionAndReturnsHttp404() throws Exception {
+    @DisplayName("findById returns not found exception")
+    void findByIdReturnsHttp404() {
         webTestClient.get()
                 .uri("/transactions/0")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperNotFoundException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 0 not found");
     }
 
     @Test
     @DisplayName("creates transaction")
-    void createsTransactionAndReturnsHttp201() throws Exception {
+    void createsTransactionAndReturnsHttp201() {
         var transaction = Transaction.builder()
                 .id(2)
                 .description("Internet-GPON")
@@ -128,8 +121,8 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
     }
 
     @Test
-    @DisplayName("creation throws exception")
-    void throwsOptimisticLockExceptionOnCreate() throws Exception {
+    @DisplayName("create conflict response")
+    void returnsCreateConflictResponse() {
         var transaction = Transaction.builder()
                 .id(1)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -148,16 +141,12 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperOptimisticLockException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction can't be created");
     }
 
     @Test
-    @DisplayName("updates transaction by id")
-    void updatesTransactionAndReturnsHttp204() throws Exception {
+    @DisplayName("updates transaction")
+    void updatesTransactionAndReturnsHttp204() {
         Transaction transaction = Transaction.builder()
                 .id(1)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -169,7 +158,7 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
                 .version(0L)
                 .build();
         webTestClient.put()
-                .uri("/transactions/1")
+                .uri("/transactions")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(transaction)
                 .exchange()
@@ -186,8 +175,8 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
     }
 
     @Test
-    @DisplayName("update throws exception")
-    void throwsOptimisticLockExceptionOnUpdate() throws Exception {
+    @DisplayName("update conflict response")
+    void returnsUpdateConflictResponse() {
         Transaction transaction = Transaction.builder()
                 .id(5)
                 .occurredOn(LocalDate.parse("2025-01-01"))
@@ -199,23 +188,19 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
                 .version(0L)
                 .build();
         webTestClient.put()
-                .uri("/transactions/5")
+                .uri("/transactions")
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(transaction)
                 .exchange()
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperOptimisticLockException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 5 can't be updated");
     }
 
     @Test
     @DisplayName("deletes transaction by id")
-    void deletesTransactionAndReturnsHttp204() throws Exception {
+    void deletesTransactionAndReturnsHttp204() {
         webTestClient.delete()
                 .uri("/transactions/1")
                 .exchange()
@@ -231,18 +216,14 @@ class TransactionControllerIntegrationTest extends MockMvcAwareTest {
     }
 
     @Test
-    @DisplayName("delete throws transaction not found exception")
-    void deleteThrowsExceptionAndReturnsHttp404() throws Exception {
+    @DisplayName("delete conflict response")
+    void returnsDeleteConflictResponse() {
         webTestClient.delete()
                 .uri("/transactions/9")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .consumeWith(result ->
-                        assertThat(getResolvedException(result))
-                                .isInstanceOf(BookkeeperNotFoundException.class)
-                )
                 .jsonPath("$.message").isEqualTo("Transaction with id 9 not found");
     }
 }
