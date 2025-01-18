@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * The class represents Bookkeeper application financial transaction.
+ * <p>
+ * This class is bounded to the web request, response body and used as domain
+ * object to be persisted in the MongoDB.
+ */
 @ResponseBody
 @Document("Transaction")
 @AllArgsConstructor

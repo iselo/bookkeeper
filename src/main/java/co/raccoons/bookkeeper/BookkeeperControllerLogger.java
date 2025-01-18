@@ -7,15 +7,18 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Bookkeeper REST controller logger.
+ */
 @Component
 @Aspect
 @Slf4j
-public class BookkeeperControllerLogger {
+final class BookkeeperControllerLogger {
 
-    @Pointcut("@within(org.springframework.web.bind.annotation.RequestMapping)")
-    private void anyEndpoint() {
-    }
-
+    /**
+     * Logs normal and exceptional states of the execution of any endpoint for
+     * any REST controller.
+     */
     @Around("anyEndpoint()")
     public Object logMethodCall(ProceedingJoinPoint joinPoint) throws Throwable {
         var timePoint = System.currentTimeMillis();
@@ -25,33 +28,12 @@ public class BookkeeperControllerLogger {
             log.info(timePoint + " Return: " + result);
             return result;
         } catch (Throwable e) {
-            log.info(timePoint + " Exception: " + e);
+            log.info(timePoint + " Exception: " + joinPoint.getSignature() + " | " + e);
             throw e;
         }
     }
 
-   /*
-
-    @AfterReturning(pointcut = "logMethodCall()", returning = "result")
-    public void adviceOnSuccess(Object result) {
+    @Pointcut("@within(org.springframework.web.bind.annotation.RequestMapping)")
+    private void anyEndpoint() {
     }
-
-    @AfterThrowing(
-            pointcut = "pointcut_reference()",
-            throwing = "exception"
-    )
-    public void adviceOnFailure(JoinPoint joinPoint, Throwable exception) {
-    }
-
-    @After("pointcut_reference()")
-    public void adviceOnSuccessOrFailure() {
-    }
-
-    @Around("pointcut_reference()")
-    public Object adviceOnInstead(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        return proceedingJoinPoint.proceed();
-    }
-
-     */
-
 }
