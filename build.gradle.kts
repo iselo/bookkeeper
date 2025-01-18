@@ -22,15 +22,19 @@ dependencies {
         "org.springframework.boot:spring-boot-starter-data-mongodb",
         "org.springframework.boot:spring-boot-starter-webflux",
         "org.springframework:spring-aspects",
+//        "org.springframework.boot:spring-boot-starter-security",
         "com.papertrailapp:logback-syslog4j:1.0.0",
         "com.google.guava:guava:33.4.0-jre",
     ).forEach { implementation(it) }
 
-    compileOnly("org.projectlombok:lombok")
+    setOf(
+        "org.springframework.boot:spring-boot-starter-test",
+//        "org.springframework.security:spring-security-test"
+    ).forEach { testImplementation(it) }
+
     annotationProcessor("org.projectlombok:lombok")
 
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test");
+    compileOnly("org.projectlombok:lombok")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
