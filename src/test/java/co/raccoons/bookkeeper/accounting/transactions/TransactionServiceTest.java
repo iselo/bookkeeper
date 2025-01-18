@@ -1,6 +1,7 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
 import co.raccoons.bookkeeper.BookkeeperNotFoundException;
+import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -132,8 +133,8 @@ class TransactionServiceTest extends MockMvcAwareTest {
         when(repository.findById(5))
                 .thenReturn(Optional.of(transaction));
 
-        assertThat(service.delete(5).getMessage())
-                .isEqualTo("Successfully deleted");
+        assertThat(service.delete(5))
+                .isEqualTo(new BookkeeperOperationStatus("Successfully deleted"));
 
         verify(repository).findById(5);
         verify(repository).delete(transaction);
