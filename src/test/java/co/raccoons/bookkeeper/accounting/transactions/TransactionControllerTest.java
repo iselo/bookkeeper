@@ -1,12 +1,12 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import co.raccoons.bookkeeper.MockMvcAwareTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc(addFilters = false)
 class TransactionControllerTest extends MockMvcAwareTest {
 
     @MockBean
@@ -77,12 +78,12 @@ class TransactionControllerTest extends MockMvcAwareTest {
     @DisplayName("findById throws transaction not found exception")
     void findByIdThrowsExceptionAndReturnsHttp404() throws Exception {
         when(transactionService.findById(0))
-                .thenThrow(new BookkeeperNotFoundException("Transaction with id 0 not found"));
+                .thenThrow(new TransactionNotFoundException("Transaction with id 0 not found"));
 
         perform(get("/transactions/0"))
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(BookkeeperNotFoundException.class)
+                                .isInstanceOf(TransactionNotFoundException.class)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -205,12 +206,12 @@ class TransactionControllerTest extends MockMvcAwareTest {
     @DisplayName("delete throws transaction not found exception")
     void deleteThrowsExceptionAndReturnsHttp404() throws Exception {
         when(transactionService.delete(9))
-                .thenThrow(new BookkeeperNotFoundException("Transaction with id 9 not found"));
+                .thenThrow(new TransactionNotFoundException("Transaction with id 9 not found"));
 
         perform(delete("/transactions/9"))
                 .andExpect(result ->
                         assertThat(result.getResolvedException())
-                                .isInstanceOf(BookkeeperNotFoundException.class)
+                                .isInstanceOf(TransactionNotFoundException.class)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

@@ -1,6 +1,5 @@
 package co.raccoons.bookkeeper.accounting.transactions;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
 import co.raccoons.bookkeeper.MockMvcAwareTest;
@@ -67,10 +66,10 @@ class TransactionServiceTest extends MockMvcAwareTest {
     @DisplayName("throws exception if not found in repository")
     void serviceThrowsExceptionIfNotFound() {
         when(repository.findById(0))
-                .thenThrow(new BookkeeperNotFoundException("Transaction with id 0 not found"));
+                .thenThrow(new TransactionNotFoundException("Transaction with id 0 not found"));
 
         assertThatThrownBy(() -> service.findById(0))
-                .isInstanceOf(BookkeeperNotFoundException.class)
+                .isInstanceOf(TransactionNotFoundException.class)
                 .hasMessage("Transaction with id 0 not found");
 
         verify(repository).findById(0);

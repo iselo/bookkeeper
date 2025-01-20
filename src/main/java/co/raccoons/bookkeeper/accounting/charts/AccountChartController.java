@@ -1,8 +1,8 @@
 package co.raccoons.bookkeeper.accounting.charts;
 
-import co.raccoons.bookkeeper.BookkeeperNotFoundException;
 import co.raccoons.bookkeeper.BookkeeperOperationStatus;
 import co.raccoons.bookkeeper.BookkeeperOptimisticLockException;
+import co.raccoons.bookkeeper.accounting.transactions.TransactionNotFoundException;
 import javax.validation.Valid;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
@@ -37,7 +37,7 @@ public class AccountChartController {
     @Valid
     public AccountChart findById(@PathVariable Integer id) {
         return accountChartRepository.findById(id)
-                .orElseThrow(() -> new BookkeeperNotFoundException(
+                .orElseThrow(() -> new TransactionNotFoundException(
                         format("Account chart with id %s not found", id)));
     }
 

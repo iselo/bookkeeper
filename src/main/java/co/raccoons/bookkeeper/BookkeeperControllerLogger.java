@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 final class BookkeeperControllerLogger {
 
     /**
-     * Logs normal and exceptional states of the execution of any endpoint for
-     * any REST controller.
+     * Logs normal and exceptional states of the execution operation of any
+     * endpoint for any REST controller.
      */
     @Around("anyEndpoint()")
     public Object logMethodCall(ProceedingJoinPoint joinPoint) throws Throwable {

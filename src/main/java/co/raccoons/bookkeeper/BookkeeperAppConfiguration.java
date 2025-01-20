@@ -11,4 +11,5 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @ComponentScan("co.raccoons.bookkeeper")
 @EnableAspectJAutoProxy
 public class BookkeeperAppConfiguration {
+
 }
